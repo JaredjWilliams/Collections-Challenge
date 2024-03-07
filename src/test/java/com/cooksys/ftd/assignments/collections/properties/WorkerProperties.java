@@ -42,7 +42,7 @@ public class WorkerProperties {
                 worker.getManager());
         assertTrue("Worker#hasManager() did not return true when constructed without a manager", worker.hasManager());
     }
-
+    //Question
     @Property
     public void noOwnerValueEquality(String name, int salary) {
         Worker a = new Worker(name);
@@ -52,6 +52,7 @@ public class WorkerProperties {
                 a, b);
     }
 
+    //Question
     @Property
     public void fullValueEquality(String name, int salary, @GenManager Manager manager) {
         Worker a = new Worker(name, manager);
@@ -75,6 +76,7 @@ public class WorkerProperties {
         if (!worker.hasManager()) {
             assertTrue("Worker#getChainOfCommand returned a non-empty List for a manager-less Worker", chainOfCommand.isEmpty());
         } else {
+
             List<Manager> expectedChainOfCommand = new ArrayList<>();
             Manager manager = worker.getManager();
             do {
@@ -82,6 +84,8 @@ public class WorkerProperties {
                 manager = manager.getManager();
             } while (manager != null);
             assertEquals("Manager#getChainOfCommand returned a list of the wrong size for an arbitrary Worker", expectedChainOfCommand.size(), chainOfCommand.size());
+            System.out.println("ECC: " + expectedChainOfCommand);
+            System.out.println("CC:  " + chainOfCommand);
             assertEquals("Manager#getChainOfCommand did not return a list with the expected values", expectedChainOfCommand, chainOfCommand);
         }
     }

@@ -1,11 +1,17 @@
 package com.cooksys.ftd.assignments.collections.model;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.cooksys.ftd.assignments.collections.util.MissingImplementationException;
 
 public class OrgChart {
+
+    private HashMap<Manager, Set<Employee>> orgChart = new HashMap<Manager, Set<Employee>>();
+    // recommends single set
 
     // TODO: this class needs to store employee data in private fields in order for the other methods to work as intended.
     //  Add those fields here. Consider how you want to store the data, and which collection types to use to make
@@ -38,7 +44,45 @@ public class OrgChart {
      * @return true if the {@code Employee} was added successfully, false otherwise
      */
     public boolean addEmployee(Employee employee) {
-        throw new MissingImplementationException();
+        Set<Employee> employees = createEmployeeSet();
+
+        if (employee == null) {
+            return false;
+        }
+
+        if (!employee.hasManager() && employee instanceof Worker) {
+            return false;
+        }
+
+        if (employees.contains(employee)) {
+            return false;
+        }
+
+        if (!orgChart.containsKey(employee.getManager())) {
+            Set<Employee> employeeSet = new HashSet<>();
+            employeeSet.add(employee);
+            orgChart.put(employee.getManager(), employeeSet);
+
+            return true;
+        }
+
+        if (orgChart.containsKey(employee.getManager())) {
+            Set<Employee> employeeSet = orgChart.get(employee.getManager());
+            employeeSet.add(employee);
+
+            return true;
+        }
+
+        if (employee.hasManager() && employee instanceof Manager) {
+            Manager manager = (Manager) employee;
+            orgChart.put(manager, new HashSet<>());
+
+            return true;
+        }
+
+
+
+        return true;
     }
 
     /**
@@ -50,7 +94,10 @@ public class OrgChart {
      * @return true if the {@code Employee} has been added to the {@code OrgChart}, false otherwise
      */
     public boolean hasEmployee(Employee employee) {
-        throw new MissingImplementationException();
+        Set<Employee> employees = createEmployeeSet();
+
+        return employees.contains(employee);
+
     }
 
     /**
@@ -64,7 +111,24 @@ public class OrgChart {
      *         been added to the {@code OrgChart}
      */
     public Set<Employee> getAllEmployees() {
-        throw new MissingImplementationException();
+        Set<Employee> employees = createEmployeeSet();
+
+        if (orgChart.isEmpty()) {
+            return employees;
+        }
+
+        return employees;
+    }
+
+    private Set<Employee> createEmployeeSet() {
+
+        Set<Employee> employees = new HashSet<>();
+
+        for (Set<Employee> e : orgChart.values()) {
+            employees.addAll(e);
+        }
+
+        return employees;
     }
 
     /**

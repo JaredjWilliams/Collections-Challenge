@@ -1,5 +1,7 @@
 package com.cooksys.ftd.assignments.collections.model;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import com.cooksys.ftd.assignments.collections.util.MissingImplementationException;
@@ -13,6 +15,9 @@ import com.cooksys.ftd.assignments.collections.util.MissingImplementationExcepti
  */
 public class Worker implements Employee {
 
+    private final String name;
+    private Manager manager;
+
     // TODO: Does this class need private fields? If so, add them here
 
     /**
@@ -21,7 +26,7 @@ public class Worker implements Employee {
      * @param name the name of the worker to be created
      */
     public Worker(String name) {
-        throw new MissingImplementationException();
+        this.name = name;
     }
 
     /**
@@ -31,7 +36,8 @@ public class Worker implements Employee {
      * @param manager the direct manager of the worker to be created
      */
     public Worker(String name, Manager manager) {
-        throw new MissingImplementationException();
+        this.name = name;
+        this.manager = manager;
     }
 
     /**
@@ -41,7 +47,7 @@ public class Worker implements Employee {
      */
     @Override
     public String getName() {
-        throw new MissingImplementationException();
+        return name;
     }
 
     /**
@@ -51,7 +57,7 @@ public class Worker implements Employee {
      */
     @Override
     public boolean hasManager() {
-        throw new MissingImplementationException();
+        return manager != null;
     }
 
     /**
@@ -61,7 +67,7 @@ public class Worker implements Employee {
      */
     @Override
     public Manager getManager() {
-        throw new MissingImplementationException();
+        return manager;
     }
 
     /**
@@ -79,10 +85,28 @@ public class Worker implements Employee {
      */
     @Override
     public List<Manager> getChainOfCommand() {
-        throw new MissingImplementationException();
+        if (!hasManager()) {
+            return new ArrayList<>();
+        }
+
+       LinkedList<Manager> managers =  new LinkedList<>(manager.getChainOfCommand());
+        managers.addFirst(manager);
+
+        return managers;
     }
 
+
+
     // TODO: Does this class need custom .equals() and .hashcode() methods? If so, implement them here.
+
+    @Override
+    public String toString() {
+        return "Worker{" +
+                "name='" + name + '\'' +
+                ", manager=" + manager +
+                '}';
+    }
+
 
     // TODO [OPTIONAL]: Consider adding a custom .toString() method here if you want to debug your code with System.out.println() statements
 }

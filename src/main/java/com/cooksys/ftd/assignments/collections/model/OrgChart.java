@@ -46,11 +46,11 @@ public class OrgChart {
     public boolean addEmployee(Employee employee) {
         Set<Employee> employees = createEmployeeSet();
 
-        if (employee == null) {
+        if (isNull(employee)) {
             return false;
         }
 
-        if (!employee.hasManager() && employee instanceof Worker) {
+        if (hasNoManager(employee) && isWorker(employee)) {
             return false;
         }
 
@@ -58,24 +58,36 @@ public class OrgChart {
             return false;
         }
 
-        if (!orgChart.containsKey(employee.getManager())) {
-            Set<Employee> employeeSet = new HashSet<>();
-            employeeSet.add(employee);
-            orgChart.put(employee.getManager(), employeeSet);
-
-            return true;
-        }
-
-        if (orgChart.containsKey(employee.getManager())) {
-            Set<Employee> employeeSet = orgChart.get(employee.getManager());
-            employeeSet.add(employee);
-
-            return true;
-        }
-
-        if (employee.hasManager() && employee instanceof Manager) {
+        if (hasNoManager(employee) && isManager(employee)) {
             Manager manager = (Manager) employee;
             orgChart.put(manager, new HashSet<>());
+
+            return true;
+        }
+
+        if (!isEmployeeManagerAdded(employee)) {
+
+            if (employee instanceof Manager && !orgChart.containsKey(employee)) {
+                Manager manager = (Manager) employee;
+                Set<Employee> employeeSet = new HashSet<>();
+                orgChart.put(manager, employeeSet);
+            }
+
+            while (employee.hasManager()) {
+                Set<Employee> employeeSet = new HashSet<>();
+                Manager manager = employee.getManager();
+                employeeSet.add(employee);
+                orgChart.put(manager, employeeSet);
+
+                employee = manager;
+            }
+
+            return true;
+        }
+
+        if (isEmployeeManagerAdded(employee)) {
+            Set<Employee> employeeSet = orgChart.get(employee.getManager());
+            employeeSet.add(employee);
 
             return true;
         }
@@ -83,6 +95,26 @@ public class OrgChart {
 
 
         return true;
+    }
+
+    private boolean isManager(Employee employee) {
+        return employee instanceof Manager;
+    }
+
+    private boolean isEmployeeManagerAdded(Employee employee) {
+        return orgChart.containsKey(employee.getManager());
+    }
+
+    private boolean hasNoManager(Employee employee) {
+        return !employee.hasManager();
+    }
+
+    private boolean isWorker(Employee employee) {
+        return employee instanceof Worker;
+    }
+
+    private boolean isNull(Employee employee) {
+        return employee == null;
     }
 
     /**
@@ -95,6 +127,8 @@ public class OrgChart {
      */
     public boolean hasEmployee(Employee employee) {
         Set<Employee> employees = createEmployeeSet();
+
+        boolean isContained = employees.contains(employee);
 
         return employees.contains(employee);
 
@@ -128,6 +162,8 @@ public class OrgChart {
             employees.addAll(e);
         }
 
+        employees.addAll(orgChart.keySet());
+
         return employees;
     }
 
@@ -142,7 +178,11 @@ public class OrgChart {
      *         have been added to the {@code OrgChart}
      */
     public Set<Manager> getAllManagers() {
-        throw new MissingImplementationException();
+        if (orgChart.isEmpty()) {
+            return new HashSet<>();
+        }
+
+        return new HashSet<>(orgChart.keySet());
     }
 
     /**
@@ -163,7 +203,8 @@ public class OrgChart {
      *         or if there are no subordinates for the given {@code Manager}
      */
     public Set<Employee> getDirectSubordinates(Manager manager) {
-        throw new MissingImplementationException();
+
+        return orgChart.get(manager) != null ? new HashSet<>(orgChart.get(manager)) : new HashSet<>();
     }
 
     /**
@@ -183,7 +224,25 @@ public class OrgChart {
      *         associated {@code Manager}, or an empty map if the {@code OrgChart} is empty.
      */
     public Map<Manager, Set<Employee>> getFullHierarchy() {
-        throw new MissingImplementationException();
+        if (orgChart.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        return createDefensiveCopy();
+    }
+
+    private Map<Manager, Set<Employee>> createDefensiveCopy() {
+        HashMap<Manager, Set<Employee>> orgChartCopy = new HashMap<>();
+
+        for (Map.Entry<Manager, Set<Employee>> entry : orgChart.entrySet()) {
+            Manager manager = entry.getKey();
+            Set<Employee> employees = entry.getValue();
+            Set<Employee> employeesCopy = new HashSet<>(employees);
+
+            orgChartCopy.put(manager, employeesCopy);
+        }
+
+        return orgChartCopy;
     }
 
 }

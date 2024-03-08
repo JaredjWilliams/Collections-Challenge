@@ -84,8 +84,6 @@ public class WorkerProperties {
                 manager = manager.getManager();
             } while (manager != null);
             assertEquals("Manager#getChainOfCommand returned a list of the wrong size for an arbitrary Worker", expectedChainOfCommand.size(), chainOfCommand.size());
-            System.out.println("ECC: " + expectedChainOfCommand);
-            System.out.println("CC:  " + chainOfCommand);
             assertEquals("Manager#getChainOfCommand did not return a list with the expected values", expectedChainOfCommand, chainOfCommand);
         }
     }

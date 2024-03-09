@@ -1,17 +1,10 @@
 package com.cooksys.ftd.assignments.collections.model;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import com.cooksys.ftd.assignments.collections.util.MissingImplementationException;
+import java.util.*;
 
 public class OrgChart {
 
     private HashMap<Manager, Set<Employee>> orgChart = new HashMap<Manager, Set<Employee>>();
-    // recommends single set
 
     // TODO: this class needs to store employee data in private fields in order for the other methods to work as intended.
     //  Add those fields here. Consider how you want to store the data, and which collection types to use to make
@@ -44,57 +37,53 @@ public class OrgChart {
      * @return true if the {@code Employee} was added successfully, false otherwise
      */
     public boolean addEmployee(Employee employee) {
-        Set<Employee> employees = createEmployeeSet();
 
         if (isNull(employee)) {
             return false;
         }
 
-        if (hasNoManager(employee) && isWorker(employee)) {
+        if (isManagerless(employee) && isWorker(employee)) {
             return false;
         }
 
-        if (employees.contains(employee)) {
+        if (getAllEmployees().contains(employee)) {
             return false;
         }
 
-        if (hasNoManager(employee) && isManager(employee)) {
-            Manager manager = (Manager) employee;
-            orgChart.put(manager, new HashSet<>());
+        if (isManagerless(employee) && isManager(employee)) {
+            addManager(employee);
 
             return true;
         }
 
         if (!isEmployeeManagerAdded(employee)) {
 
-            if (employee instanceof Manager && !orgChart.containsKey(employee)) {
-                Manager manager = (Manager) employee;
-                Set<Employee> employeeSet = new HashSet<>();
-                orgChart.put(manager, employeeSet);
+            if (employee instanceof Manager && !hasEmployee(employee)) {
+                addManager(employee);
             }
 
-            while (employee.hasManager()) {
-                Set<Employee> employeeSet = new HashSet<>();
-                Manager manager = employee.getManager();
-                employeeSet.add(employee);
-                orgChart.put(manager, employeeSet);
-
-                employee = manager;
-            }
+            createSubordinates(employee);
 
             return true;
         }
 
-        if (isEmployeeManagerAdded(employee)) {
-            Set<Employee> employeeSet = orgChart.get(employee.getManager());
-            employeeSet.add(employee);
+        if (hasEmployee(employee.getManager())) {
+            orgChart.get(employee.getManager()).add(employee);
 
             return true;
         }
-
-
 
         return true;
+    }
+
+    private void createSubordinates(Employee employee) {
+        for (Manager manager : employee.getChainOfCommand()) {
+            orgChart.computeIfAbsent(manager, k -> new HashSet<>()).add(employee);
+        }
+    }
+
+    private void addManager(Employee employee) {
+        orgChart.put((Manager) employee, new HashSet<>());
     }
 
     private boolean isManager(Employee employee) {
@@ -105,7 +94,7 @@ public class OrgChart {
         return orgChart.containsKey(employee.getManager());
     }
 
-    private boolean hasNoManager(Employee employee) {
+    private boolean isManagerless(Employee employee) {
         return !employee.hasManager();
     }
 
@@ -126,12 +115,7 @@ public class OrgChart {
      * @return true if the {@code Employee} has been added to the {@code OrgChart}, false otherwise
      */
     public boolean hasEmployee(Employee employee) {
-        Set<Employee> employees = createEmployeeSet();
-
-        boolean isContained = employees.contains(employee);
-
-        return employees.contains(employee);
-
+        return getAllEmployees().contains(employee);
     }
 
     /**
@@ -145,17 +129,6 @@ public class OrgChart {
      *         been added to the {@code OrgChart}
      */
     public Set<Employee> getAllEmployees() {
-        Set<Employee> employees = createEmployeeSet();
-
-        if (orgChart.isEmpty()) {
-            return employees;
-        }
-
-        return employees;
-    }
-
-    private Set<Employee> createEmployeeSet() {
-
         Set<Employee> employees = new HashSet<>();
 
         for (Set<Employee> e : orgChart.values()) {
@@ -182,7 +155,7 @@ public class OrgChart {
             return new HashSet<>();
         }
 
-        return new HashSet<>(orgChart.keySet());
+        return Collections.unmodifiableSet(orgChart.keySet());
     }
 
     /**
@@ -203,7 +176,6 @@ public class OrgChart {
      *         or if there are no subordinates for the given {@code Manager}
      */
     public Set<Employee> getDirectSubordinates(Manager manager) {
-
         return orgChart.get(manager) != null ? new HashSet<>(orgChart.get(manager)) : new HashSet<>();
     }
 
@@ -245,4 +217,17 @@ public class OrgChart {
         return orgChartCopy;
     }
 
+    @Override
+    public String toString() {
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (Map.Entry<Manager, Set<Employee>> entry : orgChart.entrySet()) {
+            Manager manager = entry.getKey();
+            Set<Employee> subordinates = entry.getValue();
+            stringBuilder.append("Manager: ").append(manager).append(", Subordinates: ").append(subordinates).append("\n");
+        }
+
+        return stringBuilder.toString();
+    }
 }

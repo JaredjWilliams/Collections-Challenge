@@ -106,7 +106,10 @@ public class Manager implements Employee {
         return Objects.equals(name, manager1.name) && Objects.equals(manager, manager1.manager);
     }
 
-
+    @Override
+    public String toString() {
+        return "Manager: " + "name: " + name + "\n";
+    }
 
     // TODO [OPTIONAL]: Consider adding a custom .toString() method here if you want to debug your code with System.out.println() statements
 

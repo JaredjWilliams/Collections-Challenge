@@ -96,10 +96,7 @@ public class Worker implements Employee {
         return managers;
     }
 
-
-
     // TODO: Does this class need custom .equals() and .hashcode() methods? If so, implement them here.
-
 
     @Override
     public boolean equals(Object o) {
@@ -109,13 +106,9 @@ public class Worker implements Employee {
         return Objects.equals(name, worker.name) && Objects.equals(manager, worker.manager);
     }
 
-
     @Override
     public String toString() {
-        return "Worker{" +
-                "name='" + name + '\'' +
-                ", manager=" + manager +
-                '}';
+        return "Worker: " + "name: " + name + "\n";
     }
 
 
